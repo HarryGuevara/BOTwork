@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-RSS_URL = "https://remotive.com/remote-jobs.rss"
+RSS_URL = "https://remotive.com/feed"
 
 def fetch_remotive():
     try:
