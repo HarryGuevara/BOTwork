@@ -19,16 +19,12 @@ storage:
 
 notifications:
   email:
-    enabled: false
+    enabled: true
     smtp_host: "smtp.gmail.com"
     smtp_port: 587
-    username: ""
-    password: ""
-    to: ""
-  telegram:
-    enabled: false
-    bot_token: ""
-    chat_id: ""
+    username: ""    # lo toma de GitHub Secrets
+    password: ""    # lo toma de GitHub Secrets
+    to: "harryguevarah@gmail.com"
 
 sources:
   remoteok:
