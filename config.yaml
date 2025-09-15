@@ -35,6 +35,8 @@ sources:
     enabled: true
   weworkremotely:
     enabled: true
+  remotive:
+    enabled: true
   greenhouse:
     enabled: false
     boards: []
