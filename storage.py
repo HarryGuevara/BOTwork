@@ -16,9 +16,10 @@ class JobStorage:
     def append_jobs(self, jobs):
         exists = os.path.exists(self.csv_path)
         fieldnames = ["job_id","source","company","title","location","remote","contract_type",
-                      "seniority","workload","published_at","apply_url","tags",
-                      "salary","currency","description_short","saved_at","requires_human",
-                      "application_status","applied_at","notes"]
+              "seniority","workload","published_at","apply_url","tags",
+              "salary","currency","description_short","saved_at","requires_human",
+              "passes_filters","application_status","applied_at","notes"]
+      
         now = datetime.utcnow().isoformat()
 
         with open(self.csv_path, "a", encoding="utf-8", newline="") as f:

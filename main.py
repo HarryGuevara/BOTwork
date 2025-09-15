@@ -93,8 +93,9 @@ def crawl(config):
     if sources_cfg.get("weworkremotely", {}).get("enabled", True):
         all_new += fetch_wwr()
 
-    # NUEVO: Remotive
+    # (si añadiste Remotive)
     if sources_cfg.get("remotive", {}).get("enabled", True):
+        from sources.remotive import fetch_remotive
         all_new += fetch_remotive()
 
     if sources_cfg.get("greenhouse", {}).get("enabled", False):
@@ -112,19 +113,34 @@ def crawl(config):
         if boards:
             all_new += fetch_ashby(boards)
 
+    # Marcar si pasan filtros para cada job
     prefs = config.get("preferences", {})
-    filtered = [j for j in all_new if job_matches(j, prefs)]
-    new_unique = dedupe(already, filtered)
+    for j in all_new:
+        j["passes_filters"] = 1 if job_matches(j, prefs) else 0
 
-    print(f"Encontradas total: {len(all_new)}; tras filtro: {len(filtered)}; nuevas únicas: {len(new_unique)}")
+    # Dedupe por job_id, independientemente de si pasan filtros
+    def dedupe_ids(existing_ids, jobs):
+        out = []
+        for j in jobs:
+            jid = j.get("job_id")
+            if jid and jid not in existing_ids:
+                out.append(j)
+        return out
+
+    new_unique = dedupe_ids(already, all_new)
+
+    # Para notificaciones, solo las que pasen filtros Y son nuevas
+    to_notify = [j for j in new_unique if j.get("passes_filters") == 1]
+
+    print(f"Encontradas total: {len(all_new)}; nuevas únicas: {len(new_unique)}; que pasan filtros (nuevas): {len(to_notify)}")
 
     if not new_unique:
-        print("No hay ofertas nuevas que cumplan filtros.")
+        print("No hay ofertas nuevas (aunque se registraron todas las revisadas previamente).")
         return []
 
     saved = storage.append_jobs(new_unique)
-    print(f"✅ Guardadas {len(saved)} ofertas nuevas.")
-    return saved
+    print(f"✅ Guardadas {len(saved)} ofertas nuevas (todas las revisadas se guardan; 'passes_filters' indica relevancia).")
+    return to_notify  # devolvemos las relevantes para notify
 
 
 def mark_applied(config, job_id):
