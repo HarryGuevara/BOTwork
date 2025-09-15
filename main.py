@@ -8,6 +8,8 @@ from sources.weworkremotely import fetch_wwr
 from sources.greenhouse import fetch_greenhouse
 from sources.lever import fetch_lever
 from sources.ashby import fetch_ashby
+from sources.remotive import fetch_remotive
+
 
 BOGOTA_TZ = pytz.timezone("America/Bogota")
 
@@ -91,6 +93,10 @@ def crawl(config):
     if sources_cfg.get("weworkremotely", {}).get("enabled", True):
         all_new += fetch_wwr()
 
+    # NUEVO: Remotive
+    if sources_cfg.get("remotive", {}).get("enabled", True):
+        all_new += fetch_remotive()
+
     if sources_cfg.get("greenhouse", {}).get("enabled", False):
         boards = sources_cfg["greenhouse"].get("boards", [])
         if boards:
@@ -113,7 +119,13 @@ def crawl(config):
     print(f"Encontradas total: {len(all_new)}; tras filtro: {len(filtered)}; nuevas únicas: {len(new_unique)}")
 
     if not new_unique:
-        print("No hay oferta")
+        print("No hay ofertas nuevas que cumplan filtros.")
+        return []
+
+    saved = storage.append_jobs(new_unique)
+    print(f"✅ Guardadas {len(saved)} ofertas nuevas.")
+    return saved
+
 
 def mark_applied(config, job_id):
     storage = JobStorage(config)
